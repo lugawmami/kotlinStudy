@@ -9,7 +9,7 @@ data class OpenWeatherMapServiceModel(
     val cod: String,
     val message: Double,
     val cnt: Int,
-    val list: List<X>
+    val list: List<Forecast>
 )
 
 data class City(
@@ -25,7 +25,7 @@ data class Coord(
     val lat: Double
 )
 
-data class X(
+data class Forecast(
     val dt: Int,
     val temp: Temp,
     val pressure: Double,

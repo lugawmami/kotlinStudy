@@ -11,6 +11,7 @@ import com.crcarrascal.aaakotlin.R
 import com.crcarrascal.aaakotlin.globals.disposable
 import com.crcarrascal.aaakotlin.globals.openWeatherMapServe
 import com.crcarrascal.aaakotlin.webservices.OpenWeatherMapService
+import com.crcarrascal.aaakotlin.webservices.models.Forecast
 import com.crcarrascal.aaakotlin.webservices.models.OpenWeatherMapServiceModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -19,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.find
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
 
@@ -33,36 +35,41 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         forecastList = find(R.id.forecast_list)
         val apiService = OpenWeatherMapService.create()
         //apiService.search("15646a06818f61f7b8d7823ca833e1ce", 1701668, "json", "metric", 7)
-        getWeatherData(message)
+        getWeatherData()
 
 
     }
 
-    private fun getWeatherData(textview : TextView){
+    private fun getWeatherData(){
         disposable =
                 openWeatherMapServe
                         .search("15646a06818f61f7b8d7823ca833e1ce", 1701668, "json", "metric", 8)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                { result -> showResult(result, textview)},
-                                { error -> showError(error.message, textview) }
+                                { result -> showResult(result)},
+                                { error -> showError(error.message) }
                         )
     }
 
-    private fun showResult(result : OpenWeatherMapServiceModel, textview: TextView){
+    private fun showResult(result : OpenWeatherMapServiceModel){
 
         info { "${result.toString()}" }
         weatherResult = result
 
 
         forecastList!!.layoutManager = LinearLayoutManager(this)
-        forecastList!!.adapter = ForecastListAdapter(weatherResult!!.list)
+        forecastList!!.adapter = ForecastListAdapter(weatherResult!!.list,
+                object : ForecastListAdapter.OnItemClickListener{
+                    override fun invoke(forecast : Forecast){
+                        toast(forecast.weather[0].description)
+                    }
+                })
         forecastList!!.adapter.notifyDataSetChanged()
     }
 
-    private fun showError(error: String?, textview: TextView){
-        textview.text = error
+    private fun showError(error: String?){
+
     }
 
     private val items = listOf(
